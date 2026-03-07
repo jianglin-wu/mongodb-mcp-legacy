@@ -5,7 +5,7 @@
   "type": "module",
   "main": "index.js",
   "bin": {
-    "mongodb-mcp-legacy": "./index.js"
+    "mongodb-mcp-legacy": "index.js"
   },
   "scripts": {
     "start": "node index.js",
