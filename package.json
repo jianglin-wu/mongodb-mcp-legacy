@@ -1,0 +1,63 @@
+{
+  "name": "mongodb-mcp-legacy",
+  "version": "1.0.0",
+  "description": "MCP server for legacy MongoDB (3.2+) — connect old MongoDB to Claude Code, Codex, Cursor, and other AI tools via Model Context Protocol",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "mongodb-mcp-legacy": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "keywords": [
+    "mongodb",
+    "mongodb-3",
+    "mongodb-legacy",
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "legacy",
+    "database",
+    "ai",
+    "llm",
+    "claude",
+    "codex",
+    "cursor"
+  ],
+  "author": "maximuszeng",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maximuszeng/mongodb-mcp-legacy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maximuszeng/mongodb-mcp-legacy/issues"
+  },
+  "homepage": "https://github.com/maximuszeng/mongodb-mcp-legacy#readme",
+  "files": [
+    "index.js",
+    "lib/",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "mongodb": "3.7.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.1",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
