@@ -107,7 +107,16 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             query: {
               type: 'string',
               description:
-                'Query filter as JSON string. Supports MongoDB extended JSON: use {"$oid": "..."} for ObjectId and {"$date": "..."} for ISODate (e.g., {"_id": {"$oid": "507f1f77bcf86cd799439011"}, "createdAt": {"$date": "2024-01-01T00:00:00Z"}})',
+                'Query filter as JSON string. Supports MongoDB extended JSON: use {"$oid": "..."} for ObjectId, {"$date": "..."} for ISODate, and {"$regex": "...", "$options": "..."} for regular expressions',
+            },
+            sort: {
+              type: 'string',
+              description:
+                'Sort specification as JSON string (e.g., {"createdAt": -1} or {"name": 1})',
+            },
+            skip: {
+              type: 'number',
+              description: 'Number of documents to skip (default: 0)',
             },
             limit: {
               type: 'number',
@@ -209,7 +218,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const collection = targetDb.collection(args.collection);
         const query = parseQuery(args.query);
         const limit = args.limit || 10;
-        const results = await collection.find(query).limit(limit).toArray();
+        const skip = args.skip || 0;
+        const sort = args.sort ? parseQuery(args.sort) : undefined;
+
+        let cursor = collection.find(query);
+        if (sort) cursor = cursor.sort(sort);
+        cursor = cursor.skip(skip).limit(limit);
+        const results = await cursor.toArray();
+
         return {
           content: [
             {

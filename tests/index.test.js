@@ -126,10 +126,39 @@ describe('transformQuery', () => {
 
   it('transforms values inside arrays', () => {
     const result = transformQuery({
-      _id: { $in: [{ $oid: '507f1f77bcf86cd799439011' }, { $oid: '507f1f77bcf86cd799439012' }] },
+      _id: {
+        $in: [
+          { $oid: '507f1f77bcf86cd799439011' },
+          { $oid: '507f1f77bcf86cd799439012' },
+        ],
+      },
     });
     expect(result._id.$in[0]).toBeInstanceOf(ObjectId);
     expect(result._id.$in[1]).toBeInstanceOf(ObjectId);
+  });
+
+  it('converts $regex to RegExp without options', () => {
+    const result = transformQuery({ $regex: '^hello' });
+    expect(result).toBeInstanceOf(RegExp);
+    expect(result.source).toBe('^hello');
+    expect(result.flags).toBe('');
+  });
+
+  it('converts $regex with $options to RegExp', () => {
+    const result = transformQuery({ $regex: 'hello', $options: 'i' });
+    expect(result).toBeInstanceOf(RegExp);
+    expect(result.source).toBe('hello');
+    expect(result.flags).toBe('i');
+  });
+
+  it('transforms nested query with $regex', () => {
+    const result = transformQuery({
+      name: { $regex: 'john', $options: 'i' },
+      status: 'active',
+    });
+    expect(result.name).toBeInstanceOf(RegExp);
+    expect(result.name.test('John')).toBe(true);
+    expect(result.status).toBe('active');
   });
 
   it('preserves normal objects unchanged', () => {
@@ -175,9 +204,17 @@ describe('parseQuery', () => {
   });
 
   it('converts $date in JSON query to Date', () => {
-    const result = parseQuery('{"createdAt": {"$date": "2024-01-01T00:00:00Z"}}');
+    const result = parseQuery(
+      '{"createdAt": {"$date": "2024-01-01T00:00:00Z"}}'
+    );
     expect(result.createdAt).toBeInstanceOf(Date);
     expect(result.createdAt.toISOString()).toBe('2024-01-01T00:00:00.000Z');
+  });
+
+  it('converts $regex in JSON query to RegExp', () => {
+    const result = parseQuery('{"name": {"$regex": "john", "$options": "i"}}');
+    expect(result.name).toBeInstanceOf(RegExp);
+    expect(result.name.test('John')).toBe(true);
   });
 
   it('throws on invalid JSON', () => {
