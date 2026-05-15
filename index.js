@@ -107,7 +107,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             query: {
               type: 'string',
               description:
-                'Query filter as JSON string (e.g., {"status": "active"})',
+                'Query filter as JSON string. Supports MongoDB extended JSON: use {"$oid": "..."} for ObjectId and {"$date": "..."} for ISODate (e.g., {"_id": {"$oid": "507f1f77bcf86cd799439011"}, "createdAt": {"$date": "2024-01-01T00:00:00Z"}})',
             },
             limit: {
               type: 'number',
@@ -135,7 +135,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             query: {
               type: 'string',
-              description: 'Query filter as JSON string',
+              description:
+                'Query filter as JSON string. Supports MongoDB extended JSON: use {"$oid": "..."} for ObjectId and {"$date": "..."} for ISODate',
             },
           },
           required: ['collection'],
