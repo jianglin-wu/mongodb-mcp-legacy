@@ -179,6 +179,35 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['collection', 'field'],
         },
       },
+      {
+        name: 'aggregate',
+        description: 'Execute an aggregation pipeline on a collection',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            database: {
+              type: 'string',
+              description:
+                'Database name (optional, uses default if not specified)',
+            },
+            collection: {
+              type: 'string',
+              description: 'Collection name',
+            },
+            pipeline: {
+              type: 'string',
+              description:
+                'Aggregation pipeline as JSON array string. Supports MongoDB extended JSON: use {"$oid": "..."} for ObjectId, {"$date": "..."} for ISODate, and {"$regex": "...", "$options": "..."} for regular expressions. Example: [{"$match": {"status": "active"}}, {"$group": {"_id": "$category", "total": {"$sum": 1}}}]',
+            },
+            limit: {
+              type: 'number',
+              description:
+                'Maximum number of documents to return (default: 100)',
+            },
+          },
+          required: ['collection', 'pipeline'],
+        },
+      },
     ],
   };
 });
@@ -289,6 +318,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify(values, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'aggregate': {
+        const targetDb = resolveDb(args);
+        const collection = targetDb.collection(args.collection);
+        const pipeline = parseQuery(args.pipeline);
+        if (!Array.isArray(pipeline)) {
+          throw new Error('Pipeline must be a JSON array');
+        }
+        const limit = args.limit || 100;
+        const results = await collection
+          .aggregate(pipeline)
+          .limit(limit)
+          .toArray();
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(results, null, 2),
             },
           ],
         };

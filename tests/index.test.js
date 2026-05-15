@@ -171,6 +171,18 @@ describe('transformQuery', () => {
     expect(transformQuery(42)).toBe(42);
     expect(transformQuery(null)).toBe(null);
   });
+
+  it('transforms aggregation pipeline array', () => {
+    const pipeline = transformQuery([
+      {
+        $match: { status: 'active', _id: { $oid: '507f1f77bcf86cd799439011' } },
+      },
+      { $group: { _id: '$category', total: { $sum: 1 } } },
+    ]);
+    expect(pipeline[0].$match.status).toBe('active');
+    expect(pipeline[0].$match._id).toBeInstanceOf(ObjectId);
+    expect(pipeline[1].$group._id).toBe('$category');
+  });
 });
 
 describe('parseQuery', () => {
@@ -215,6 +227,16 @@ describe('parseQuery', () => {
     const result = parseQuery('{"name": {"$regex": "john", "$options": "i"}}');
     expect(result.name).toBeInstanceOf(RegExp);
     expect(result.name.test('John')).toBe(true);
+  });
+
+  it('parses aggregation pipeline array', () => {
+    const result = parseQuery(
+      '[{"$match": {"status": "active"}}, {"$group": {"_id": "$category"}}]'
+    );
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(2);
+    expect(result[0].$match.status).toBe('active');
+    expect(result[1].$group._id).toBe('$category');
   });
 
   it('throws on invalid JSON', () => {
