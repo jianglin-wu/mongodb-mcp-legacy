@@ -151,6 +151,34 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['collection'],
         },
       },
+      {
+        name: 'distinct_values',
+        description: 'Get distinct values for a field in a collection',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            database: {
+              type: 'string',
+              description:
+                'Database name (optional, uses default if not specified)',
+            },
+            collection: {
+              type: 'string',
+              description: 'Collection name',
+            },
+            field: {
+              type: 'string',
+              description: 'Field name to get distinct values for',
+            },
+            query: {
+              type: 'string',
+              description:
+                'Optional query filter as JSON string. Supports MongoDB extended JSON: use {"$oid": "..."} for ObjectId, {"$date": "..."} for ISODate, and {"$regex": "...", "$options": "..."} for regular expressions',
+            },
+          },
+          required: ['collection', 'field'],
+        },
+      },
     ],
   };
 });
@@ -246,6 +274,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: `Count: ${count}`,
+            },
+          ],
+        };
+      }
+
+      case 'distinct_values': {
+        const targetDb = resolveDb(args);
+        const collection = targetDb.collection(args.collection);
+        const query = parseQuery(args.query);
+        const values = await collection.distinct(args.field, query);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(values, null, 2),
             },
           ],
         };
